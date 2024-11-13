@@ -36,7 +36,7 @@ jobs:
 
     - name: Scan Docker Image with Trivy
       env:
-          IMAGE_NAME: gcr.io/${{ secrets.GOOGLE_PROJECT }}/demo/nginx:latest
+          IMAGE_NAME: us-central1-docker.pkg.dev/absolute-bloom-439721-q7/demo/nginx:latest
       run: |
           trivy image --exit-code 1 --severity CRITICAL, HIGH gcr.io/${{ secrets.GOOGLE_PROJECT }}/demo/nginx:latest    
 
