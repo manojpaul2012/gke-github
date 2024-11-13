@@ -7,7 +7,7 @@ on:
 
 jobs:
   deploy:
-    runs-on: ubuntu:1.1-8+deb11u1
+    runs-on: ubuntu-latest
     steps:
 
     - name: code checkout
@@ -32,5 +32,5 @@ jobs:
         GOOGLE_PROJECT: ${{ secrets.GOOGLE_PROJECT }}
       run: |
         gcloud auth configure-docker us-central1-docker.pkg.dev
-        docker build -t us-central1-docker.pkg.dev/$GOOGLE_PROJECT/demo/nginx:latest .
-        docker push us-central1-docker.pkg.dev/$GOOGLE_PROJECT/demo/nginx:latest
+        docker build -t us-central1-docker.pkg.dev/$GOOGLE_PROJECT/demo/nginx:1.1-8+deb11u1 .
+        docker push us-central1-docker.pkg.dev/$GOOGLE_PROJECT/demo/nginx:1.1-8+deb11u1
