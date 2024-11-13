@@ -43,6 +43,7 @@ jobs:
       continue-on-error: true  # Allow continuation even if artifact is missing
 
       # Run Trivy with DB download fallback
+      # Current issue with trivy https://github.com/aquasecurity/trivy/discussions/7668 
     - name: Run Trivy Scan with Fallback DB Update
       run: |
         if [ ! -d "~/.cache/trivy/db" ]; then
