@@ -35,7 +35,8 @@ jobs:
           sudo dpkg -i trivy_0.41.0_Linux-64bit.deb
 
     - name: Verify IMAGE_NAME
-      run: echo "Image to scan: $IMAGE_NAME"
+      run: |
+          echo "Image to scan: $IMAGE_NAME"
 
     - name: Scan Docker Image with Trivy
       env:
