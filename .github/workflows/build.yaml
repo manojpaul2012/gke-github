@@ -44,14 +44,14 @@ jobs:
 
       # Run Trivy with DB download fallback
     - name: Run Trivy Scan with Fallback DB Update
-    run: |
-         if [ ! -d "~/.cache/trivy/db" ]; then
-         echo "No Trivy DB cache found; downloading DB..."
-         trivy image --exit-code 1 --severity CRITICAL,HIGH gcr.io/***/demo/nginx:latest
-          else
-         echo "Trivy DB cache found; running scan..."
+      run: |
+        if [ ! -d "~/.cache/trivy/db" ]; then
+          echo "No Trivy DB cache found; downloading DB..."
+          trivy image --exit-code 1 --severity CRITICAL,HIGH gcr.io/***/demo/nginx:latest
+        else
+          echo "Trivy DB cache found; running scan..."
           trivy image --skip-db-update --exit-code 1 --severity CRITICAL,HIGH gcr.io/***/demo/nginx:latest
-         fi    
+        fi    
 
     - name: build and push the docker image
       env:
