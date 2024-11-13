@@ -35,23 +35,23 @@ jobs:
           sudo dpkg -i trivy_0.41.0_Linux-64bit.deb
 
     # Attempt to download Trivy DB artifact if it exists
-      - name: Download Trivy DB Artifact
-        uses: actions/download-artifact@v3
-        with:
-          name: trivy-db
-          path: ~/.cache/trivy/db
-        continue-on-error: true  # Allow continuation even if artifact is missing
+    - name: Download Trivy DB Artifact
+      uses: actions/download-artifact@v3
+      with:
+        name: trivy-db
+        path: ~/.cache/trivy/db
+      continue-on-error: true  # Allow continuation even if artifact is missing
 
       # Run Trivy with DB download fallback
-      - name: Run Trivy Scan with Fallback DB Update
-        run: |
-          if [ ! -d "~/.cache/trivy/db" ]; then
-            echo "No Trivy DB cache found; downloading DB..."
-            trivy image --exit-code 1 --severity CRITICAL,HIGH gcr.io/***/demo/nginx:latest
+    - name: Run Trivy Scan with Fallback DB Update
+    run: |
+         if [ ! -d "~/.cache/trivy/db" ]; then
+         echo "No Trivy DB cache found; downloading DB..."
+         trivy image --exit-code 1 --severity CRITICAL,HIGH gcr.io/***/demo/nginx:latest
           else
-            echo "Trivy DB cache found; running scan..."
-            trivy image --skip-db-update --exit-code 1 --severity CRITICAL,HIGH gcr.io/***/demo/nginx:latest
-          fi    
+         echo "Trivy DB cache found; running scan..."
+          trivy image --skip-db-update --exit-code 1 --severity CRITICAL,HIGH gcr.io/***/demo/nginx:latest
+         fi    
 
     - name: build and push the docker image
       env:
