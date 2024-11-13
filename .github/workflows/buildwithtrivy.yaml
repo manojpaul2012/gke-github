@@ -1,0 +1,70 @@
+name: Deploy Nginx
+
+on:
+  push:
+    branches:
+    - 'main'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: code checkout
+      uses: actions/checkout@v2
+
+    - name: Authenticate to Google Cloud
+      id: auth
+      uses: google-github-actions/auth@v1
+      with:
+          credentials_json: ${{ secrets.CREDENTIALS_JSON }}  
+
+    - name: install the gcloud cli
+      uses: 'google-github-actions/setup-gcloud@v2'
+      with:
+        version: '>= 363.0.0'
+        project_id: ${{ secrets.GOOGLE_PROJECT }}
+        service_account: ${{ secrets.credentials_json }}
+        export_default_credentials: true
+
+    # **Trivy Scan Step**
+    - name: Install Trivy
+      run: |
+          sudo apt-get update && sudo apt-get install -y wget
+          wget https://github.com/aquasecurity/trivy/releases/download/v0.41.0/trivy_0.41.0_Linux-64bit.deb
+          sudo dpkg -i trivy_0.41.0_Linux-64bit.deb
+
+    # Attempt to download Trivy DB artifact if it exists
+    - name: Download Trivy DB Artifact
+      uses: actions/download-artifact@v3
+      with:
+        name: trivy-db
+        path: ~/.cache/trivy/db
+      continue-on-error: true  # Allow continuation even if artifact is missing
+
+      # Run Trivy with DB download fallback
+      # Current issue with trivy https://github.com/aquasecurity/trivy/discussions/7668 
+    - name: Run Trivy Scan with Fallback DB Update
+      run: |
+        if [ ! -d "~/.cache/trivy/db" ]; then
+          echo "No Trivy DB cache found; downloading DB..."
+          trivy image --exit-code 1 --severity CRITICAL,HIGH gcr.io/***/demo/nginx:latest
+        else
+          echo "Trivy DB cache found; running scan..."
+          trivy image --skip-db-update --exit-code 1 --severity CRITICAL,HIGH gcr.io/***/demo/nginx:latest
+        fi    
+
+    - name: build and push the docker image
+      env:
+        GOOGLE_PROJECT: ${{ secrets.GOOGLE_PROJECT }}
+      run: |
+        gcloud auth configure-docker us-central1-docker.pkg.dev
+        docker build -t us-central1-docker.pkg.dev/$GOOGLE_PROJECT/demo/nginx:latest .
+        docker push us-central1-docker.pkg.dev/$GOOGLE_PROJECT/demo/nginx:latest
+
+    - name: Upload Trivy DB as Artifact
+      if: success()
+      uses: actions/upload-artifact@v3
+      with:
+        name: trivy-db
+        path: ~/.cache/trivy/db
