@@ -34,15 +34,11 @@ jobs:
           wget https://github.com/aquasecurity/trivy/releases/download/v0.41.0/trivy_0.41.0_Linux-64bit.deb
           sudo dpkg -i trivy_0.41.0_Linux-64bit.deb
 
-    - name: Verify IMAGE_NAME
-      run: |
-          echo "Image to scan: $IMAGE_NAME"
-
     - name: Scan Docker Image with Trivy
       env:
           IMAGE_NAME: gcr.io/${{ secrets.GOOGLE_PROJECT }}/demo/nginx:latest
       run: |
-          trivy image --exit-code 1 --severity CRITICAL, HIGH $IMAGE_NAME    
+          trivy image --exit-code 1 --severity CRITICAL, HIGH gcr.io/${{ secrets.GOOGLE_PROJECT }}/demo/nginx:latest    
 
     - name: build and push the docker image
       env:
