@@ -28,16 +28,16 @@ jobs:
         export_default_credentials: true
 
     # **Trivy Scan Step**
-      - name: Install Trivy
-        run: |
+    - name: Install Trivy
+      run: |
           sudo apt-get update && sudo apt-get install -y wget
           wget https://github.com/aquasecurity/trivy/releases/download/v0.41.0/trivy_0.41.0_Linux-64bit.deb
           sudo dpkg -i trivy_0.41.0_Linux-64bit.deb
 
-      - name: Scan Docker Image with Trivy
-        env:
+    - name: Scan Docker Image with Trivy
+      env:
           IMAGE_NAME: gcr.io/${{ secrets.GOOGLE_PROJECT }}/demo/nginx:latest
-        run: |
+      run: |
           trivy image --exit-code 1 --severity CRITICAL, HIGH $IMAGE_NAME    
 
     - name: build and push the docker image
