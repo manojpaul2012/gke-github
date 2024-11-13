@@ -34,25 +34,24 @@ jobs:
           wget https://github.com/aquasecurity/trivy/releases/download/v0.41.0/trivy_0.41.0_Linux-64bit.deb
           sudo dpkg -i trivy_0.41.0_Linux-64bit.deb
 
-    - name: Download Trivy DB Artifact
-      uses: actions/download-artifact@v4
-      with:
-        name: trivy-db
-        path: ~/.cache/trivy/db
+    # Attempt to download Trivy DB artifact if it exists
+      - name: Download Trivy DB Artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: trivy-db
+          path: ~/.cache/trivy/db
+        continue-on-error: true  # Allow continuation even if artifact is missing
 
-    - name: Cache Trivy DB
-      uses: actions/cache@v2
-      with:
-        path: ~/.cache/trivy/db
-        key: ${{ runner.os }}-trivy-db
-        restore-keys: |
-          ${{ runner.os }}-trivy-db
-
-    - name: Scan Docker Image with Trivy
-      env:
-          IMAGE_NAME: gcr.io/${{ secrets.GOOGLE_PROJECT }}/demo/nginx:latest
-      run: |
-          trivy image --skip-db-update --exit-code 1 --severity CRITICAL,HIGH gcr.io/${{ secrets.GOOGLE_PROJECT }}/demo/nginx:latest    
+      # Run Trivy with DB download fallback
+      - name: Run Trivy Scan with Fallback DB Update
+        run: |
+          if [ ! -d "~/.cache/trivy/db" ]; then
+            echo "No Trivy DB cache found; downloading DB..."
+            trivy image --exit-code 1 --severity CRITICAL,HIGH gcr.io/***/demo/nginx:latest
+          else
+            echo "Trivy DB cache found; running scan..."
+            trivy image --skip-db-update --exit-code 1 --severity CRITICAL,HIGH gcr.io/***/demo/nginx:latest
+          fi    
 
     - name: build and push the docker image
       env:
@@ -64,7 +63,7 @@ jobs:
 
     - name: Upload Trivy DB as Artifact
       if: success()
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v3
       with:
         name: trivy-db
         path: ~/.cache/trivy/db
