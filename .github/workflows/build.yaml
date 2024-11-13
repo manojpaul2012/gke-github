@@ -34,11 +34,19 @@ jobs:
           wget https://github.com/aquasecurity/trivy/releases/download/v0.41.0/trivy_0.41.0_Linux-64bit.deb
           sudo dpkg -i trivy_0.41.0_Linux-64bit.deb
 
+    - name: Cache Trivy DB
+      uses: actions/cache@v2
+      with:
+        path: ~/.cache/trivy/db
+        key: ${{ runner.os }}-trivy-db
+        restore-keys: |
+          ${{ runner.os }}-trivy-db
+
     - name: Scan Docker Image with Trivy
       env:
           IMAGE_NAME: gcr.io/${{ secrets.GOOGLE_PROJECT }}/demo/nginx:latest
       run: |
-          trivy image --exit-code 1 --severity CRITICAL,HIGH gcr.io/${{ secrets.GOOGLE_PROJECT }}/demo/nginx:latest    
+          trivy image --skip-db-update --exit-code 1 --severity CRITICAL,HIGH gcr.io/${{ secrets.GOOGLE_PROJECT }}/demo/nginx:latest    
 
     - name: build and push the docker image
       env:
