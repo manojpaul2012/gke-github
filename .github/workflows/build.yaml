@@ -38,7 +38,7 @@ jobs:
       env:
           IMAGE_NAME: us-central1-docker.pkg.dev/absolute-bloom-439721-q7/demo/nginx:latest
       run: |
-          trivy image --exit-code 1 --severity CRITICAL, HIGH us-central1-docker.pkg.dev/absolute-bloom-439721-q7/demo/nginx:latest    
+          trivy image --exit-code 1 --severity CRITICAL,HIGH us-central1-docker.pkg.dev/absolute-bloom-439721-q7/demo/nginx:latest    
 
     - name: build and push the docker image
       env:
