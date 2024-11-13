@@ -33,6 +33,12 @@ jobs:
           sudo apt-get update && sudo apt-get install -y wget
           wget https://github.com/aquasecurity/trivy/releases/download/v0.41.0/trivy_0.41.0_Linux-64bit.deb
           sudo dpkg -i trivy_0.41.0_Linux-64bit.deb
+          
+    - name: Download Trivy DB Artifact
+      uses: actions/download-artifact@v2
+      with:
+        name: trivy-db
+        path: ~/.cache/trivy/db
 
     - name: Cache Trivy DB
       uses: actions/cache@v2
@@ -55,3 +61,10 @@ jobs:
         gcloud auth configure-docker us-central1-docker.pkg.dev
         docker build -t us-central1-docker.pkg.dev/$GOOGLE_PROJECT/demo/nginx:latest .
         docker push us-central1-docker.pkg.dev/$GOOGLE_PROJECT/demo/nginx:latest
+
+    - name: Upload Trivy DB as Artifact
+      if: success()
+      uses: actions/upload-artifact@v2
+      with:
+        name: trivy-db
+        path: ~/.cache/trivy/db
