@@ -1,4 +1,4 @@
-FROM nginx:latest
+FROM nginx:1.1-8+deb11u1
 
 # Run security updates to patch vulnerabilities
 RUN apt-get update && apt-get upgrade -y && rm -rf /var/lib/apt/lists/*
